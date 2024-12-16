@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: monbayashi  # rootユーザーのパスワード
+      MYSQL_DATABASE: share_price  # データベース名
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  # データ永続化
+
+  backend:
+    build: ./backend
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=mysql://root:monbayashi@db/share_price  # パスワードを一致させる
+      - ALPHA_VANTAGE_API_KEY=KFL4FFPTUFSZ5Y03
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  mysql_data:
